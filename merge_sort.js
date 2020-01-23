@@ -1,3 +1,5 @@
+const { curry } = require('crocks/helpers')
+
 const mergeSort = (arr) => {
     if (arr.length === 1)
         return arr;
@@ -5,26 +7,32 @@ const mergeSort = (arr) => {
     var midpoint = Math.floor(arr.length / 2);
 
     var a = arr.slice(0, midpoint);
-    var b = arr.slice(midpoint, arr.length);    
-    return merge(mergeSort(a), mergeSort(b));
+    var b = arr.slice(midpoint, arr.length);
+
+    return merge(consume(a[0], b[0]), mergeSort(a), mergeSort(b));
 }
 
-const consume = (a, b) => a[0] <  b[0];
+const consume = (a, b) => a < b;
 
-const merge = (a, b) => {
-    let newArray = [];
+const merge = (consumes, a, b) => {
+    var newArray = [];
 
-    while (a && a.length > 0 && b && b.length > 0) {        
-        if (consume(a,b)) {
-            newArray.push(a[0]);
-            a.shift();
-        }
-        else {
-            newArray.push(b[0]);
-            b.shift();
-        }
+    if (a.length < 1)
+        return b;
+
+    else if (b.length < 1)
+        return a;
+
+    if (consumes) {
+        newArray.push(a[0]);
+        a.shift();
     }    
-    return newArray.concat(a, b);
+    else {
+        newArray.push(b[0]);
+        b.shift();
+    }
+
+    return newArray.concat(merge(consume(a[0], b[0]), a, b));
 }
 
 module.exports = { mergeSort };
